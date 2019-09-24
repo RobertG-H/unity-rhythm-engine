@@ -44,6 +44,9 @@ TagManager:
   - name: BG
     uniqueID: 4206664905
     locked: 0
+  - name: Note
+    uniqueID: 1179562891
+    locked: 0
   - name: Player
     uniqueID: 3434501951
     locked: 0
