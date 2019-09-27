@@ -1,6 +1,8 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
 /// <summary> The Conductor tracks the song position and controls any other synced action.</summary>
 public class Conductor : MonoBehaviour
 {
@@ -62,18 +64,29 @@ public class Conductor : MonoBehaviour
         hasStarted = true;
     }
 
-    public double getAudioSourceTime()
+    public double GetAudioSourceTime()
     {
         return musicSource.time;
     }
 
-    public double getSongTime()
+    public double GetSongTime()
     {
         return songTime;
     }
 
-    public double getSongBeat()
+    public double GetSongBeat()
     {
         return songPositionInBeats;
+    }
+
+    public bool IsQuarterBeat() 
+    {
+        float intSongPositionInBeats = (int) Math.Round (songPositionInBeats, 0) + 0.5f;
+        if (songPositionInBeats < intSongPositionInBeats + 0.3f && songPositionInBeats > intSongPositionInBeats - 0.3f) 
+        {
+            Debug.Log (songPositionInBeats);
+            return true;
+        }
+        return false;
     }
 }

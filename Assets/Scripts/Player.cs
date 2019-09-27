@@ -11,6 +11,8 @@ public class Player : MonoBehaviour
     private ScreenFlash screenFlash;
 
     private bool isHitting;
+
+    private bool killable;
     
 
     void Start()
@@ -21,11 +23,18 @@ public class Player : MonoBehaviour
 
     void Update()
     {
-        if(Input.GetKeyDown("a") && isHitting == false) 
+        if(Input.GetKeyDown("a")) 
         {
             isHitting = true;
             Debug.Log ("press");
-            StartCoroutine (Hitting());
+            StartCoroutine (Hitting ());
+            if (Conductor.Instance.IsQuarterBeat () == true) 
+            {
+                screenFlash.Flash ();
+                Debug.Log ("Hit");
+                killable = true;
+            }
+            
         }
         else 
         {
@@ -40,6 +49,7 @@ public class Player : MonoBehaviour
         yield return new WaitForSeconds(0.1f);
         Debug.Log ("unpress");
         isHitting = false;
+        killable = false;
         UpdateHitColor ();
     }
 
@@ -52,12 +62,9 @@ public class Player : MonoBehaviour
     }
 
     private void OnTriggerStay2D (Collider2D collision) {
-        if (isHitting)
+        if (killable)
         {
-            screenFlash.Flash ();
-            Debug.Log ("Hit");
-            GameObject.Destroy (collision.gameObject);
-
+            collision.GetComponent<Note> ().Death ();
         }
     }
 }
