@@ -23,15 +23,15 @@ public class Player : MonoBehaviour
 
     void Update()
     {
-        if(Input.GetKeyDown("a")) 
+        if(Input.GetKeyDown("space")) 
         {
             isHitting = true;
-            Debug.Log ("press");
+            //Debug.Log ("press");
             StartCoroutine (Hitting ());
-            if (Conductor.Instance.IsQuarterBeat () == true) 
+            if (Conductor.Instance.CheckHit () == true) 
             {
                 screenFlash.Flash ();
-                Debug.Log ("Hit");
+               // Debug.Log ("Hit");
                 killable = true;
             }
             
@@ -46,8 +46,8 @@ public class Player : MonoBehaviour
     IEnumerator Hitting() 
     {
         UpdateHitColor();
-        yield return new WaitForSeconds(0.1f);
-        Debug.Log ("unpress");
+        yield return new WaitForSeconds(0.05f);
+        //Debug.Log ("unpress");
         isHitting = false;
         killable = false;
         UpdateHitColor ();

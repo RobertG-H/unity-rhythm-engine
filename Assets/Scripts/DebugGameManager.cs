@@ -14,7 +14,7 @@ public class DebugGameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown("space"))
+        if (Input.GetKeyDown("p"))
         {
             Conductor.Instance.StartSong();
             Time.timeScale = 1f;
