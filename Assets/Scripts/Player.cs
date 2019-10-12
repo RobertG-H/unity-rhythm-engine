@@ -13,7 +13,7 @@ public class Player : MonoBehaviour
     private bool isHitting;
 
     private bool killable;
-    
+
 
     void Start()
     {
@@ -23,27 +23,27 @@ public class Player : MonoBehaviour
 
     void Update()
     {
-        if(Input.GetKeyDown("space")) 
+        if(Input.GetKeyDown("space")  || Input.GetKeyDown("m")) 
         {
             isHitting = true;
             //Debug.Log ("press");
             StartCoroutine (Hitting ());
-            if (Conductor.Instance.CheckHit () == true) 
+            if (Conductor.Instance.CheckHit () == true)
             {
                 screenFlash.Flash ();
                // Debug.Log ("Hit");
                 killable = true;
             }
-            
+
         }
-        else 
+        else
         {
-            
+
             isHitting = false;
         }
     }
 
-    IEnumerator Hitting() 
+    IEnumerator Hitting()
     {
         UpdateHitColor();
         yield return new WaitForSeconds(0.05f);
@@ -53,7 +53,7 @@ public class Player : MonoBehaviour
         UpdateHitColor ();
     }
 
-    public void UpdateHitColor () 
+    public void UpdateHitColor ()
     {
         if (isHitting)
             sprite.color = Color.blue;
@@ -68,5 +68,3 @@ public class Player : MonoBehaviour
         }
     }
 }
-
-

@@ -360,13 +360,13 @@ PrefabInstance:
     - target: {fileID: 61994030766484812, guid: 1869db9d398a9bc438e97b1b48bc679b,
         type: 3}
       propertyPath: songBpm
-      value: 180
+      value: 120
       objectReference: {fileID: 0}
     - target: {fileID: 61994030766484811, guid: 1869db9d398a9bc438e97b1b48bc679b,
         type: 3}
       propertyPath: m_audioClip
       value: 
-      objectReference: {fileID: 8300000, guid: 6bce0c82ac6c3e9429aab7726f84d03d, type: 3}
+      objectReference: {fileID: 8300000, guid: a2e72dbacee574143823fd7aad3be5af, type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1869db9d398a9bc438e97b1b48bc679b, type: 3}
 --- !u!1 &654328828
@@ -597,7 +597,7 @@ Transform:
   m_GameObject: {fileID: 984340843}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -7.2, y: 0, z: 0}
-  m_LocalScale: {x: 1.352496, y: 9, z: 1}
+  m_LocalScale: {x: 0.88, y: 9, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 2

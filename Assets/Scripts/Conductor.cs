@@ -17,6 +17,18 @@ public struct MidiNote
     }
 }
 
+public struct TimeSig
+{
+    public int Num;
+    public int Denom;
+
+    public TimeSig (int num, int denom)
+    {
+        Num = num;
+        Denom = denom;
+    }
+}
+
 /// <summary> The Conductor tracks the song position and controls any other synced action.</summary>
 public class Conductor : MonoBehaviour
 {
@@ -26,6 +38,12 @@ public class Conductor : MonoBehaviour
     private AudioSource musicSource;
 
     private List<MidiNote> midiNotes;
+
+    private float ticksperQuarterNote;
+
+    private TimeSig timeSig;
+
+    private int finalTick;
 
     // Variables that keep track of song.
     private double previousFrameTime;
@@ -97,10 +115,10 @@ public class Conductor : MonoBehaviour
         return songPositionInBeats;
     }
 
-    public bool IsQuarterBeat() 
+    public bool IsQuarterBeat()
     {
         float intSongPositionInBeats = (int) Math.Round (songPositionInBeats, 0) + 0.5f;
-        if (songPositionInBeats < intSongPositionInBeats + correctThreshold && songPositionInBeats > intSongPositionInBeats - correctThreshold) 
+        if (songPositionInBeats < intSongPositionInBeats + correctThreshold && songPositionInBeats > intSongPositionInBeats - correctThreshold)
         {
             Debug.Log (songPositionInBeats);
             return true;
@@ -113,9 +131,39 @@ public class Conductor : MonoBehaviour
         midiNotes = newNoteList;
     }
 
+    public void SetTicksperQuarterNote (float newTicksperQuarterNote)
+    {
+        ticksperQuarterNote = newTicksperQuarterNote;
+    }
+
+    public float GetTicksPerQuarterNote()
+    {
+        return ticksperQuarterNote;
+    }
+
     public List<MidiNote> GetMidiNotes()
     {
         return midiNotes;
+    }
+
+    public void SetTimeSig (TimeSig newTimeSig)
+    {
+        timeSig = newTimeSig;
+    }
+
+    public TimeSig GetTimeSig ()
+    {
+        return timeSig;
+    }
+
+    public void SetFinalTick(int newfinalTick)
+    {
+        finalTick = newfinalTick;
+    }
+
+    public int GetFinalTick()
+    {
+        return finalTick;
     }
 
     public bool CheckHit()
@@ -126,9 +174,9 @@ public class Conductor : MonoBehaviour
         {
             double notePosition = 0;
             // TODO make sure this works with different time signatures
-            notePosition += (midiNote.Bar) * 3;
+            notePosition += (midiNote.Bar) * 4;
             notePosition += (midiNote.Beat);
-            notePosition += midiNote.Tick / 15360.0;// TicksperQuarterNote is 15360
+            notePosition += midiNote.Tick / ticksperQuarterNote;
             if (currentBeat > notePosition + correctThreshold)
             {
                 //midiNotes.Remove (midiNote);
@@ -136,7 +184,7 @@ public class Conductor : MonoBehaviour
             //Debug.Log ("Noteposition: " +notePosition);
             if (currentBeat < notePosition + correctThreshold && currentBeat > notePosition - correctThreshold)
             {
-                   
+
                 return true;
             }
         }
