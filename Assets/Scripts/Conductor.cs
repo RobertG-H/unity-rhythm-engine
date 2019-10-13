@@ -8,12 +8,14 @@ public struct MidiNote
     public int Bar;
     public int Beat;
     public int Tick;
+    public float Length;
 
-    public MidiNote (int bar, int beat, int tick)
+    public MidiNote (int bar, int beat, int tick, float length)
     {
         Bar = bar;
         Beat = beat;
         Tick = tick;
+        Length = length;
     }
 }
 
