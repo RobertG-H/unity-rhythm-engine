@@ -31,7 +31,7 @@ public class SyncedAnimation : MonoBehaviour
     void Update()
     {
         //Start playing the current animation from wherever the current conductor loop is
-        animator.Play(currentState, -1, ((float)Conductor.Instance.getSongTime()));
+        animator.Play(currentState, -1, ((float)Conductor.Instance.GetSongTime()));
         //Set the speed to 0 so it will only change frames when you next update it
         animator.speed = 0;
     }

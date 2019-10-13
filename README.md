@@ -1,7 +1,7 @@
 # unity-rhythm-engine
-A template project for creating rhythm games in Unity.
+A template project for creating rhythm games in Unity. A current work in progress.
 
 # Current working test information
-* Load the test scene
-* Press `space` to start the song
-* Press the `p` on the beat to receive the message "hit" in the `Debug.Log()` 
+* Load the `MusicScore` scene.
+* Press `p` to start the song
+* Press the `space` or `m` button on the beat to destroy the notes.

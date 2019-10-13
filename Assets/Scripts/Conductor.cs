@@ -1,6 +1,36 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
+public struct MidiNote
+{
+    public int Bar;
+    public int Beat;
+    public int Tick;
+    public float Length;
+
+    public MidiNote (int bar, int beat, int tick, float length)
+    {
+        Bar = bar;
+        Beat = beat;
+        Tick = tick;
+        Length = length;
+    }
+}
+
+public struct TimeSig
+{
+    public int Num;
+    public int Denom;
+
+    public TimeSig (int num, int denom)
+    {
+        Num = num;
+        Denom = denom;
+    }
+}
+
 /// <summary> The Conductor tracks the song position and controls any other synced action.</summary>
 public class Conductor : MonoBehaviour
 {
@@ -8,6 +38,14 @@ public class Conductor : MonoBehaviour
     public static Conductor Instance;
 
     private AudioSource musicSource;
+
+    private List<MidiNote> midiNotes;
+
+    private float ticksperQuarterNote;
+
+    private TimeSig timeSig;
+
+    private int finalTick;
 
     // Variables that keep track of song.
     private double previousFrameTime;
@@ -24,6 +62,8 @@ public class Conductor : MonoBehaviour
     private double firstBeatOffset;
 
     private bool hasStarted = false;
+
+    private float correctThreshold = 0.3f;
 
     void Awake()
     {
@@ -42,7 +82,7 @@ public class Conductor : MonoBehaviour
     {
         if (hasStarted)
         {
-            songTime += AudioSettings.dspTime - previousFrameTime - firstBeatOffset;
+            songTime += AudioSettings.dspTime - previousFrameTime - firstBeatOffset; // TODO fix firstbeatoffset
             previousFrameTime = AudioSettings.dspTime;
             if(musicSource.time != lastReportedPlayheadPosition) {
                 songTime = (songTime + musicSource.time)/2;
@@ -62,18 +102,95 @@ public class Conductor : MonoBehaviour
         hasStarted = true;
     }
 
-    public double getAudioSourceTime()
+    public double GetAudioSourceTime()
     {
         return musicSource.time;
     }
 
-    public double getSongTime()
+    public double GetSongTime()
     {
         return songTime;
     }
 
-    public double getSongBeat()
+    public double GetSongBeat()
     {
         return songPositionInBeats;
+    }
+
+    public bool IsQuarterBeat()
+    {
+        float intSongPositionInBeats = (int) Math.Round (songPositionInBeats, 0) + 0.5f;
+        if (songPositionInBeats < intSongPositionInBeats + correctThreshold && songPositionInBeats > intSongPositionInBeats - correctThreshold)
+        {
+            Debug.Log (songPositionInBeats);
+            return true;
+        }
+        return false;
+    }
+
+    public void SetMidiNotes(List<MidiNote> newNoteList)
+    {
+        midiNotes = newNoteList;
+    }
+
+    public void SetTicksperQuarterNote (float newTicksperQuarterNote)
+    {
+        ticksperQuarterNote = newTicksperQuarterNote;
+    }
+
+    public float GetTicksPerQuarterNote()
+    {
+        return ticksperQuarterNote;
+    }
+
+    public List<MidiNote> GetMidiNotes()
+    {
+        return midiNotes;
+    }
+
+    public void SetTimeSig (TimeSig newTimeSig)
+    {
+        timeSig = newTimeSig;
+    }
+
+    public TimeSig GetTimeSig ()
+    {
+        return timeSig;
+    }
+
+    public void SetFinalTick(int newfinalTick)
+    {
+        finalTick = newfinalTick;
+    }
+
+    public int GetFinalTick()
+    {
+        return finalTick;
+    }
+
+    public bool CheckHit()
+    {
+        double currentBeat = songPositionInBeats -0.5f;
+        //Debug.Log ("currentBeat: " + currentBeat);
+        foreach (MidiNote midiNote in midiNotes)
+        {
+            double notePosition = 0;
+            // TODO make sure this works with different time signatures
+            notePosition += (midiNote.Bar) * 4;
+            notePosition += (midiNote.Beat);
+            notePosition += midiNote.Tick / ticksperQuarterNote;
+            if (currentBeat > notePosition + correctThreshold)
+            {
+                //midiNotes.Remove (midiNote);
+            }
+            //Debug.Log ("Noteposition: " +notePosition);
+            if (currentBeat < notePosition + correctThreshold && currentBeat > notePosition - correctThreshold)
+            {
+
+                return true;
+            }
+        }
+
+        return false;
     }
 }

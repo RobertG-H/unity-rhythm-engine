@@ -16,12 +16,12 @@ public class TestCube : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        songPositionInBeatsInt = (int)Conductor.Instance.getSongBeat();
+        songPositionInBeatsInt = (int)Conductor.Instance.GetSongBeat();
         rangeCalc = songPositionInBeatsInt;
         // Debug.Log(songPositionInBeatsInt);
         if (Input.GetKeyDown("p"))
         {
-            if(Conductor.Instance.getSongBeat() < rangeCalc + 0.4 && Conductor.Instance.getSongBeat() > rangeCalc - 0.4)
+            if(Conductor.Instance.GetSongBeat() < rangeCalc + 0.4 && Conductor.Instance.GetSongBeat() > rangeCalc - 0.4)
             {
                 Debug.Log("Hit");
             }

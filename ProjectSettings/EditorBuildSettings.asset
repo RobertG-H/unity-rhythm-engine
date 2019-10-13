@@ -8,4 +8,7 @@ EditorBuildSettings:
   - enabled: 0
     path: 
     guid: 00000000000000000000000000000000
+  - enabled: 1
+    path: Assets/Scenes/MusicScore.unity
+    guid: 133311d32af6f1b409113fa2729ab21c
   m_configObjects: {}

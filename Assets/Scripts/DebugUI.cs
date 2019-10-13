@@ -19,7 +19,7 @@ public class DebugUI : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        audioSourceTime.text = "Song Beat Time: " + Conductor.Instance.getSongBeat();
-        calcSongTime.text = "Calc Song Time: " + Conductor.Instance.getSongTime();
+        audioSourceTime.text = "Song Beat Time: " + Conductor.Instance.GetSongBeat();
+        calcSongTime.text = "Calc Song Time: " + Conductor.Instance.GetSongTime();
     }
 }
