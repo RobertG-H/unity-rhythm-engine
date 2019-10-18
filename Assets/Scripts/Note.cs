@@ -10,13 +10,11 @@ public class Note : MonoBehaviour
     private GameObject deathParticles;
 
     private Rigidbody2D rb;
-    // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody2D> ();
     }
 
-    // Update is called once per frame
     void Update()
     {
         
@@ -31,5 +29,10 @@ public class Note : MonoBehaviour
     {
         Instantiate (deathParticles, gameObject.transform.position, Quaternion.identity);
         Destroy (gameObject);
+    }
+
+    public void SetSpeed(float newSpeed)
+    {
+        speed = newSpeed;
     }
 }

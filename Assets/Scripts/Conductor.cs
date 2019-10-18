@@ -2,19 +2,22 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 public struct MidiNote
 {
     public int Bar;
     public int Beat;
     public int Tick;
+    public float Position;
     public float Length;
 
-    public MidiNote (int bar, int beat, int tick, float length)
+    public MidiNote (int bar, int beat, int tick, float notePosition, float length)
     {
         Bar = bar;
         Beat = beat;
         Tick = tick;
+        Position = notePosition;
         Length = length;
     }
 }
@@ -23,15 +26,31 @@ public struct TimeSig
 {
     public int Num;
     public int Denom;
+    public float WHOLE;
+    public float HALF;
+    public float QUARTER;
+    public float EIGHTH;
+    public float SIXTEENTH;
 
+    // Assumes all time signatures use a denom of 4
     public TimeSig (int num, int denom)
     {
         Num = num;
+        // TODO fix denom being 2 sometimes
+        denom = 4;
+        Assert.AreEqual (denom, 4);
         Denom = denom;
+        WHOLE = num;
+        HALF = 2.0f;
+        QUARTER = 1.0f;
+        EIGHTH = QUARTER / 2.0f;
+        SIXTEENTH = EIGHTH / 2.0f;
     }
 }
 
-/// <summary> The Conductor tracks the song position and controls any other synced action.</summary>
+/// <summary> 
+/// The Conductor tracks the song position and controls any other synced action.
+/// </summary>
 public class Conductor : MonoBehaviour
 {
     //Conductor instance
@@ -39,13 +58,11 @@ public class Conductor : MonoBehaviour
 
     private AudioSource musicSource;
 
+    // Main vars with getters and setters
     private List<MidiNote> midiNotes;
-
     private float ticksperQuarterNote;
-
     private TimeSig timeSig;
-
-    private int finalTick;
+    private float finalBeat;
 
     // Variables that keep track of song.
     private double previousFrameTime;
@@ -70,12 +87,10 @@ public class Conductor : MonoBehaviour
         Instance = this;
     }
 
-
     void Start()
     {
         musicSource = GetComponent<AudioSource>();
         secPerBeat = 60f / songBpm;
-
     }
 
     void Update()
@@ -84,7 +99,8 @@ public class Conductor : MonoBehaviour
         {
             songTime += AudioSettings.dspTime - previousFrameTime - firstBeatOffset; // TODO fix firstbeatoffset
             previousFrameTime = AudioSettings.dspTime;
-            if(musicSource.time != lastReportedPlayheadPosition) {
+            if(musicSource.time != lastReportedPlayheadPosition)
+            {
                 songTime = (songTime + musicSource.time)/2;
                 lastReportedPlayheadPosition = musicSource.time;
             }
@@ -92,7 +108,9 @@ public class Conductor : MonoBehaviour
         }
     }
 
-
+    /// <summary>
+    /// Start the soing
+    /// </summary>
     public void StartSong()
     {
         musicSource.Play();
@@ -102,21 +120,7 @@ public class Conductor : MonoBehaviour
         hasStarted = true;
     }
 
-    public double GetAudioSourceTime()
-    {
-        return musicSource.time;
-    }
-
-    public double GetSongTime()
-    {
-        return songTime;
-    }
-
-    public double GetSongBeat()
-    {
-        return songPositionInBeats;
-    }
-
+    /* DEPRECATED
     public bool IsQuarterBeat()
     {
         float intSongPositionInBeats = (int) Math.Round (songPositionInBeats, 0) + 0.5f;
@@ -126,6 +130,58 @@ public class Conductor : MonoBehaviour
             return true;
         }
         return false;
+    }*/
+
+    public bool CheckHit ()
+    {
+        double currentBeat = songPositionInBeats - 0.5f; // TODO figure out why this needs a 0.5f offset.
+        foreach (MidiNote midiNote in midiNotes)
+        {
+            if (currentBeat > midiNote.Position + correctThreshold)
+            {
+                //midiNotes.Remove (midiNote); // TODO figure out a way to remove notes after they have been passed
+            }
+            if (currentBeat < midiNote.Position + correctThreshold && currentBeat > midiNote.Position - correctThreshold)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// GETTERS AND SETTERS
+    /// </summary>
+
+    public float GetBpm ()
+    {
+        return (float) songBpm;
+    }
+
+    public void SetBpm (float newBpm)
+    {
+        songBpm = (double) newBpm;
+    }
+
+    public double GetAudioSourceTime ()
+    {
+        return musicSource.time;
+    }
+
+    public double GetSongTime ()
+    {
+        return songTime;
+    }
+
+    public double GetSongBeat ()
+    {
+        return songPositionInBeats;
+    }
+
+    public List<MidiNote> GetMidiNotes ()
+    {
+        return midiNotes;
     }
 
     public void SetMidiNotes(List<MidiNote> newNoteList)
@@ -133,24 +189,14 @@ public class Conductor : MonoBehaviour
         midiNotes = newNoteList;
     }
 
-    public void SetTicksperQuarterNote (float newTicksperQuarterNote)
-    {
-        ticksperQuarterNote = newTicksperQuarterNote;
-    }
-
-    public float GetTicksPerQuarterNote()
+    public float GetTicksPerQuarterNote ()
     {
         return ticksperQuarterNote;
     }
 
-    public List<MidiNote> GetMidiNotes()
+    public void SetTicksperQuarterNote (float newTicksperQuarterNote)
     {
-        return midiNotes;
-    }
-
-    public void SetTimeSig (TimeSig newTimeSig)
-    {
-        timeSig = newTimeSig;
+        ticksperQuarterNote = newTicksperQuarterNote;
     }
 
     public TimeSig GetTimeSig ()
@@ -158,39 +204,19 @@ public class Conductor : MonoBehaviour
         return timeSig;
     }
 
-    public void SetFinalTick(int newfinalTick)
+    public void SetTimeSig (TimeSig newTimeSig)
     {
-        finalTick = newfinalTick;
+        timeSig = newTimeSig;
     }
 
-    public int GetFinalTick()
+    public float GetFinalBeat ()
     {
-        return finalTick;
+        return finalBeat;
     }
 
-    public bool CheckHit()
+    public void SetFinalBeat(float newfinalTick)
     {
-        double currentBeat = songPositionInBeats -0.5f;
-        //Debug.Log ("currentBeat: " + currentBeat);
-        foreach (MidiNote midiNote in midiNotes)
-        {
-            double notePosition = 0;
-            // TODO make sure this works with different time signatures
-            notePosition += (midiNote.Bar) * 4;
-            notePosition += (midiNote.Beat);
-            notePosition += midiNote.Tick / ticksperQuarterNote;
-            if (currentBeat > notePosition + correctThreshold)
-            {
-                //midiNotes.Remove (midiNote);
-            }
-            //Debug.Log ("Noteposition: " +notePosition);
-            if (currentBeat < notePosition + correctThreshold && currentBeat > notePosition - correctThreshold)
-            {
-
-                return true;
-            }
-        }
-
-        return false;
+        finalBeat = newfinalTick;
     }
+
 }

@@ -1,13 +1,19 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class NoteSpawner : MonoBehaviour
 {
+    // GAME OBJECT PREFABS
     [SerializeField]
     private GameObject note;
     [SerializeField]
+    private float noteSpeed;
+    [SerializeField]
     private GameObject measure;
+
+    // SPRITES
     [SerializeField]
     private Sprite wholeNoteSprite;
     [SerializeField]
@@ -17,8 +23,6 @@ public class NoteSpawner : MonoBehaviour
     [SerializeField]
     private Sprite eighthNoteSprite;
     [SerializeField]
-    private Sprite doubleEighthNoteSprite;
-    [SerializeField]
     private Sprite wholeRestSprite;
     [SerializeField]
     private Sprite halfRestSprite;
@@ -26,22 +30,26 @@ public class NoteSpawner : MonoBehaviour
     private Sprite quarterRestSprite;
     [SerializeField]
     private Sprite eighthRestSprite;
+
+    // SPAWN CALCULATIONS
     [SerializeField]
     private float noteStartOffset = -6.3f;
     [SerializeField]
     private float measureStartOffset;
-    private bool runOnce = true;
     private float noteHeightOffset = 0.1f;
-    // What size step to move when generating notes. 1 = 1 beat
+    // What size step to move when generating notes.
+    // 1 scoreStep = check for a note every beat (quarter note).
+    // 0.5 scoreStep = check for a note every half beat (eighth note).
     private float scoreStep = 0.5f;
-    // Start is called before the first frame update
+
+    private bool runOnce = true;
+    private float spawnDistanceMultiplier;
+
     void Start()
     {
         measureStartOffset = noteStartOffset - 1;
-        /*for(int i = 0; i < 128; i++) {
-            Instantiate (note, new Vector3 (startOffset + i*4, 0, 0), Quaternion.identity);
-            Instantiate (measure, new Vector3 (3.5f+i*16, 0, 0), Quaternion.identity);
-        }*/
+        float bps = Conductor.Instance.GetBpm () / 60.0f;
+        spawnDistanceMultiplier = Math.Abs(noteSpeed) / bps;
     }
 
     // Update is called once per frame
@@ -50,149 +58,94 @@ public class NoteSpawner : MonoBehaviour
         if (runOnce)
         {
             runOnce = false;
-            List<MidiNote> midiNotes = Conductor.Instance.GetMidiNotes ();
-            List<float> notePositionList = new List<float>();
-            List<float> noteLengthsList = new List<float> ();
-            Debug.Log ("Starting note position logging");
-            float prevNotePosition = -1;
-            int maxIndex = -1;
-            foreach (MidiNote midiNote in midiNotes)
+            SpawnAllNotes ();
+        }
+    }
+
+    private void SpawnAllNotes()
+    {
+        List<MidiNote> midiNotes = Conductor.Instance.GetMidiNotes ();
+        Debug.Log ("Starting note position logging");
+        int index = 0;
+        // Iterate through the score one step at a time
+        float test = Conductor.Instance.GetFinalBeat ();
+        for (float scorePosition = 0.0f; scorePosition < Conductor.Instance.GetFinalBeat (); scorePosition += scoreStep)
+        {
+            
+            if (scorePosition == midiNotes[index].Position && index < midiNotes.Count - 1)
             {
-                float notePosition = 0;
-                notePosition += (midiNote.Bar) * Conductor.Instance.GetTimeSig().Num;
-                notePosition += (midiNote.Beat);
-                notePosition += midiNote.Tick / Conductor.Instance.GetTicksPerQuarterNote ();
-                if (notePosition != prevNotePosition)
-                {
-                    notePositionList.Add(notePosition);
-                    noteLengthsList.Add (midiNote.Length);
-                    prevNotePosition = notePosition;
-                    maxIndex++;
-                }
-            }
-            int index = 0;
-            float currentNotePosition = notePositionList [index];
-            float currentNoteLength = noteLengthsList [index];
-            float nextNotePosition = notePositionList [index + 1];
-            float nextNoteLength = noteLengthsList [index + 1];
 
-            // Iterate through the score one step at a time (8th or 16th step) 
-            for (float scorePosition = 0.0f; scorePosition < Conductor.Instance.GetFinalTick(); scorePosition += scoreStep)
-            {
-                if (scorePosition == currentNotePosition && index < maxIndex)
-                {
-
-                    // Check for rest spawning
-                    bool spawnedRest = CreateRest (currentNotePosition + currentNoteLength, nextNotePosition);
-
-                    // Spawn rest first because need to check for connected eighth notes.
-                    if (spawnedRest)
-                    {
-                        // Spawn note normally
-                        CreateNote (scorePosition, currentNoteLength);
-                        // Update index 
-                        index++;
-                    }
-                    else
-                    {
-                        // If the current note and the next note are eighth notes then they should be connected
-                        if (nextNoteLength == 0.5f && currentNoteLength == 0.5f)
-                        {
-                            // TODO fix connected note spawning
-                            /*TEMP*/
-                            CreateNote (scorePosition, currentNoteLength);
-                            index++;
-                            /*ENDTEMP*/
-                            //CreateNote (scorePosition, 0.55f);
-                            // Update index + 2 because spawned two note 
-                            //index += 2;
-                        }
-                        else
-                        {
-                            // Spawn note normally
-                            CreateNote (scorePosition, currentNoteLength);
-                            // Update index 
-                            index++;
-                        }
-                    }
-
-
-
-
-
-                    // Update note positions
-                    if (index <+ maxIndex)
-                    {
-                        currentNotePosition = notePositionList [index];
-                        currentNoteLength = noteLengthsList [index];
-                        if (index < maxIndex)
-                        {
-                            nextNotePosition = notePositionList [index + 1];
-                            nextNoteLength = noteLengthsList [index + 1];
-                        }
-                    }
-
-                        
-                }
-                if (scorePosition % (Conductor.Instance.GetTimeSig().Num) == 0)
-                {
-                    Instantiate (measure, new Vector3(measureStartOffset + (scorePosition *4.0f), 0, 0), Quaternion.identity);
-                }
-                //return;
-
+                // Check for rest spawning
+                bool spawnedRest = CreateRest (midiNotes [index].Position + midiNotes [index].Length, midiNotes [index + 1].Position);
+                // Spawn note
+                CreateNote (scorePosition, midiNotes [index].Length);
+                // Update index 
+                index++;
             }
 
+            // Spawn measure line
+            if (scorePosition % (Conductor.Instance.GetTimeSig ().Num) == 0)
+            {
+                GameObject newSprite = Instantiate (measure, new Vector3 (measureStartOffset + (scorePosition * spawnDistanceMultiplier), 0, 0), Quaternion.identity);
+                newSprite.GetComponent<Note> ().SetSpeed (noteSpeed);
+            }
         }
     }
 
     private void CreateNote (float scorePosition, float currentNoteLength)
     {
+        float roundedLength = RoundLength (currentNoteLength);
         // Default state
         Sprite sprite = wholeNoteSprite;
-        Debug.Log ("Position: " + scorePosition + " current note length: " + currentNoteLength);
         // Whole sprite
-        if (currentNoteLength == Conductor.Instance.GetTimeSig ().Num)
+        if (roundedLength == Conductor.Instance.GetTimeSig ().WHOLE)
             sprite = wholeNoteSprite;
         // Half sprite
-        else if (currentNoteLength == (int) (Conductor.Instance.GetTimeSig ().Num / 2.0f))
+        else if (roundedLength == Conductor.Instance.GetTimeSig ().HALF)
             sprite = halfNoteSprite;
         // Quarter sprite
-        else if (currentNoteLength == 1)
+        else if (roundedLength == Conductor.Instance.GetTimeSig ().QUARTER)
             sprite = quarterNoteSprite;
         // eighth sprite
-        else if (currentNoteLength == 0.5f)
+        else if (roundedLength == Conductor.Instance.GetTimeSig ().EIGHTH)
             sprite = eighthNoteSprite;
-        else if (currentNoteLength == 0.55f)
-            sprite = doubleEighthNoteSprite;
-        GameObject newNote = Instantiate (note, new Vector3 (noteStartOffset + (scorePosition * (4.0f)), noteHeightOffset, 0), Quaternion.identity);
+        GameObject newNote = Instantiate (note, new Vector3 (noteStartOffset + (scorePosition * spawnDistanceMultiplier), noteHeightOffset, 0), Quaternion.identity);
         newNote.GetComponent<SpriteRenderer> ().sprite = sprite;
+        newNote.GetComponent<Note> ().SetSpeed (noteSpeed);
     }
 
     private bool CreateRest (float endOfCurrentNote, float startOfNextNote)
     {
         float restDur = startOfNextNote - endOfCurrentNote;
+        float roundedLength = RoundLength (restDur);
         Sprite sprite = wholeRestSprite;
         // No space for rest
-        if (restDur <= 0) return false;
+        if (roundedLength <= 0) return false;
         // Cases for different sized rests
 
         // Whole rest
-        if (restDur == Conductor.Instance.GetTimeSig ().Num)
+        if (roundedLength == Conductor.Instance.GetTimeSig ().WHOLE)
             sprite = wholeRestSprite;
         // Half rest
-        else if (restDur == Conductor.Instance.GetTimeSig ().Num/2.0f)
+        else if (roundedLength == Conductor.Instance.GetTimeSig ().HALF)
             sprite = halfRestSprite;
         // Quarter rest
-        else if (restDur == 1.0f)
+        else if (roundedLength == Conductor.Instance.GetTimeSig ().QUARTER)
             sprite = quarterRestSprite;
         // eighth rest
-        else if (restDur == 0.5f)
+        else if (roundedLength == Conductor.Instance.GetTimeSig ().EIGHTH)
             sprite = eighthRestSprite;
-        GameObject newSprite = Instantiate (note, new Vector3 (noteStartOffset + (endOfCurrentNote * (4.0f)), noteHeightOffset, 0), Quaternion.identity);
+        GameObject newSprite = Instantiate (note, new Vector3 (noteStartOffset + (endOfCurrentNote * spawnDistanceMultiplier), noteHeightOffset, 0), Quaternion.identity);
         newSprite.GetComponent<SpriteRenderer> ().sprite = sprite;
-
+        newSprite.GetComponent<Note> ().SetSpeed (noteSpeed);
         return true;
     }
 
-
+    private float RoundLength(float num)
+    {
+        num *= 4;
+        num = (float) Math.Round ((double)num);
+        num /= 4;
+        return num;
+    }
 }

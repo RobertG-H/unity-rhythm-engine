@@ -5,13 +5,13 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
+    // Graphic objects
     private SpriteRenderer sprite;
-
     [SerializeField]
     private ScreenFlash screenFlash;
 
+    // Private bools
     private bool isHitting;
-
     private bool killable;
 
 
@@ -26,28 +26,26 @@ public class Player : MonoBehaviour
         if(Input.GetKeyDown("space")  || Input.GetKeyDown("m")) 
         {
             isHitting = true;
-            //Debug.Log ("press");
             StartCoroutine (Hitting ());
             if (Conductor.Instance.CheckHit () == true)
             {
                 screenFlash.Flash ();
-               // Debug.Log ("Hit");
                 killable = true;
             }
-
         }
         else
         {
-
             isHitting = false;
         }
     }
 
+    /// <summary>
+    /// Controls color of player on hit, and puts hitting on cooldown, so player can't spam.
+    /// </summary>
     IEnumerator Hitting()
     {
         UpdateHitColor();
         yield return new WaitForSeconds(0.05f);
-        //Debug.Log ("unpress");
         isHitting = false;
         killable = false;
         UpdateHitColor ();
