@@ -1,0 +1,58 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &4404442932580867277
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4404442932580867266}
+  - component: {fileID: 4404442932580867267}
+  m_Layer: 0
+  m_Name: Note Spawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4404442932580867266
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4404442932580867277}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4404442932580867267
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4404442932580867277}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c4bf0af395766524d93b7a5550fa18c4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  note: {fileID: 6572227300849220022, guid: bfcc8ae0fafe7f643b5ca7e1fbf3eae5, type: 3}
+  noteSpeed: -8
+  measure: {fileID: 1249508410398310029, guid: 352e8c619b3dce44a9fa79fa860425f6, type: 3}
+  wholeNoteSprite: {fileID: 21300000, guid: 1b1e00b32e47e0e4c98581d03cc98d4e, type: 3}
+  halfNoteSprite: {fileID: 21300000, guid: 6422396684242344b939fd516b5d11ac, type: 3}
+  quarterNoteSprite: {fileID: 21300000, guid: 9c419580e42d8394c8f6e851f7a3b600, type: 3}
+  eighthNoteSprite: {fileID: 21300000, guid: 75a6ac7de8ab32145934a2af3880d712, type: 3}
+  wholeRestSprite: {fileID: 21300000, guid: e157593c6a682054db44fee584986768, type: 3}
+  halfRestSprite: {fileID: 21300000, guid: d6877db13224d784398469bf48f84586, type: 3}
+  quarterRestSprite: {fileID: 21300000, guid: 0d4a9f53a7694294494cbd3c73b71d27, type: 3}
+  eighthRestSprite: {fileID: 21300000, guid: 589be35446063d34e80fdc639c896880, type: 3}
+  noteStartOffset: -6.3
+  measureStartOffset: 0
