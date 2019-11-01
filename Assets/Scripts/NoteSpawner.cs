@@ -67,14 +67,14 @@ public class NoteSpawner : MonoBehaviour
         if (runOnce)
         {
             runOnce = false;
-            SpawnAllNotes(Conductor.Instance.GetMidiNotes(NoteType.TREBLE), trebleScoreHeight);
-            //SpawnAllNotes(Conductor.Instance.GetMidiNotes(NoteType.BASS), bassScoreHeight);
+            SpawnAllNotes(NoteType.TREBLE, trebleScoreHeight);
+            SpawnAllNotes(NoteType.BASS, bassScoreHeight);
         }
     }
 
-    private void SpawnAllNotes(List<MidiNote> midiNotes, float scoreHeight)
+    private void SpawnAllNotes(NoteType noteType, float scoreHeight)
     {
-
+        List<MidiNote> midiNotes = Conductor.Instance.GetMidiNotes(noteType);
         Debug.Log("Starting note position logging");
         int index = 0;
         // Iterate through the score one step at a time
@@ -86,7 +86,7 @@ public class NoteSpawner : MonoBehaviour
                 // Check for rest spawning
                 bool spawnedRest = CreateRest(midiNotes[index].Position + midiNotes[index].Length, midiNotes[index + 1].Position, scoreHeight);
                 // Spawn note
-                CreateNote(scorePosition, midiNotes[index].Length, scoreHeight);
+                CreateNote(scorePosition, midiNotes[index].Length, scoreHeight, noteType);
                 // Update index 
                 index++;
             }
@@ -100,7 +100,7 @@ public class NoteSpawner : MonoBehaviour
         }
     }
 
-    private void CreateNote(float scorePosition, float currentNoteLength, float scoreHeight)
+    private void CreateNote(float scorePosition, float currentNoteLength, float scoreHeight, NoteType noteType)
     {
         float roundedLength = RoundLength(currentNoteLength);
         // Default state
@@ -120,6 +120,7 @@ public class NoteSpawner : MonoBehaviour
         GameObject newNote = Instantiate(note, new Vector3(noteStartOffset + (scorePosition * spawnDistanceMultiplier), noteHeightOffset + scoreHeight, 0), Quaternion.identity);
         newNote.GetComponent<SpriteRenderer>().sprite = sprite;
         newNote.GetComponent<Note>().SetSpeed(noteSpeed);
+        newNote.GetComponent<Note>().SetNoteType(noteType);
     }
 
     private bool CreateRest(float endOfCurrentNote, float startOfNextNote, float scoreHeight)

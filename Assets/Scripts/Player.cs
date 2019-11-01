@@ -14,6 +14,8 @@ public class Player : MonoBehaviour
     private bool isHitting;
     private bool killable;
 
+    private NoteType currentKillingType;
+
 
     void Start()
     {
@@ -32,6 +34,7 @@ public class Player : MonoBehaviour
             {
                 screenFlash.Flash();
                 killable = true;
+                currentKillingType = NoteType.BASS;
             }
         }
         // Treble
@@ -43,6 +46,7 @@ public class Player : MonoBehaviour
             {
                 screenFlash.Flash();
                 killable = true;
+                currentKillingType = NoteType.TREBLE;
             }
         }
         else
@@ -75,7 +79,8 @@ public class Player : MonoBehaviour
     {
         if (killable)
         {
-            collision.GetComponent<Note>().Death();
+            if (currentKillingType == collision.GetComponent<Note>().GetNoteType())
+                collision.GetComponent<Note>().Death();
         }
     }
 }

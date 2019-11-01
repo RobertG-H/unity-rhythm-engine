@@ -55,10 +55,10 @@ public class MidiController : MonoBehaviour
         {
             Debug.LogWarning("Warning! Midi file has more than one track. Taking first track");
         }
-        int counter = 0;
         int totalMidiEvents = midiFile.Events[0].Count;
-        foreach (var midiEvent in midiFile.Events[0])
+        for (int i = 0; i < totalMidiEvents; i++)
         {
+            MidiEvent midiEvent = midiFile.Events[0][i];
             if (timeSignature is null)
             {
                 try
@@ -70,7 +70,7 @@ public class MidiController : MonoBehaviour
             if (!MidiEvent.IsNoteOff(midiEvent))
             {
                 // Get the final tick of the song
-                if (counter == totalMidiEvents - 1)
+                if (i == totalMidiEvents - 1)
                 {
                     int eventTime = (int)midiEvent.AbsoluteTime;
                     if (eventTime > finalTick)
@@ -83,16 +83,16 @@ public class MidiController : MonoBehaviour
                     float noteLength = 0;
 
                     // Not at the end yet
-                    if (counter < totalMidiEvents)
+                    if (i < totalMidiEvents)
                     {
-                        MidiEvent nextMidievent = midiEvent;
+                        MidiEvent nextMidievent = midiFile.Events[0][i + 1];
                         noteLength = ((float)nextMidievent.DeltaTime / ticksperQuarterNote);
                     }
+                    Debug.Log(noteLength);
                     MidiNote note = GenerateMidiNote(midiEvent.AbsoluteTime, noteLength);
                     midiNotes.Add(note);
                 }
             }
-            counter += 1;
         }
     }
 

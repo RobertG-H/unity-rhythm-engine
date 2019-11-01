@@ -148,7 +148,7 @@ public class Conductor : MonoBehaviour
             midiNotes = bassMidiNotes;
         else
             Debug.LogError("Error: Conductor.cs CheckHit() invalid NoteType");
-        double currentBeat = songPositionInBeats - 0.5f; // TODO figure out why this needs a 0.5f offset.
+        double currentBeat = songPositionInBeats;
         foreach (MidiNote midiNote in midiNotes)
         {
             if (currentBeat > midiNote.Position + correctThreshold)
