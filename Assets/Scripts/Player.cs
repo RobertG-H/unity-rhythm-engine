@@ -14,23 +14,39 @@ public class Player : MonoBehaviour
     private bool isHitting;
     private bool killable;
 
+    private NoteType currentKillingType;
+
 
     void Start()
     {
-        sprite = GetComponent < SpriteRenderer >();
+        sprite = GetComponent<SpriteRenderer>();
         isHitting = false;
     }
 
     void Update()
     {
-        if(Input.GetKeyDown("space")  || Input.GetKeyDown("m")) 
+        // Bass
+        if (Input.GetKeyDown("s") || Input.GetKeyDown("d") || Input.GetKeyDown("f"))
         {
             isHitting = true;
-            StartCoroutine (Hitting ());
-            if (Conductor.Instance.CheckHit () == true)
+            StartCoroutine(Hitting());
+            if (Conductor.Instance.CheckHit(NoteType.BASS) == true)
             {
-                screenFlash.Flash ();
+                screenFlash.Flash();
                 killable = true;
+                currentKillingType = NoteType.BASS;
+            }
+        }
+        // Treble
+        if (Input.GetKeyDown("j") || Input.GetKeyDown("k") || Input.GetKeyDown("l"))
+        {
+            isHitting = true;
+            StartCoroutine(Hitting());
+            if (Conductor.Instance.CheckHit(NoteType.TREBLE) == true)
+            {
+                screenFlash.Flash();
+                killable = true;
+                currentKillingType = NoteType.TREBLE;
             }
         }
         else
@@ -48,10 +64,10 @@ public class Player : MonoBehaviour
         yield return new WaitForSeconds(0.05f);
         isHitting = false;
         killable = false;
-        UpdateHitColor ();
+        UpdateHitColor();
     }
 
-    public void UpdateHitColor ()
+    public void UpdateHitColor()
     {
         if (isHitting)
             sprite.color = Color.blue;
@@ -59,10 +75,12 @@ public class Player : MonoBehaviour
             sprite.color = Color.white;
     }
 
-    private void OnTriggerStay2D (Collider2D collision) {
+    private void OnTriggerStay2D(Collider2D collision)
+    {
         if (killable)
         {
-            collision.GetComponent<Note> ().Death ();
+            if (currentKillingType == collision.GetComponent<Note>().GetNoteType())
+                collision.GetComponent<Note>().Death();
         }
     }
 }

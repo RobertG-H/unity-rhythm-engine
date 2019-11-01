@@ -12,7 +12,7 @@ public struct MidiNote
     public float Position;
     public float Length;
 
-    public MidiNote (int bar, int beat, int tick, float notePosition, float length)
+    public MidiNote(int bar, int beat, int tick, float notePosition, float length)
     {
         Bar = bar;
         Beat = beat;
@@ -33,12 +33,12 @@ public struct TimeSig
     public float SIXTEENTH;
 
     // Assumes all time signatures use a denom of 4
-    public TimeSig (int num, int denom)
+    public TimeSig(int num, int denom)
     {
         Num = num;
         // TODO fix denom being 2 sometimes
         denom = 4;
-        Assert.AreEqual (denom, 4);
+        Assert.AreEqual(denom, 4);
         Denom = denom;
         WHOLE = num;
         HALF = 2.0f;
@@ -47,6 +47,12 @@ public struct TimeSig
         SIXTEENTH = EIGHTH / 2.0f;
     }
 }
+
+public enum NoteType
+{
+    TREBLE,
+    BASS
+};
 
 /// <summary> 
 /// The Conductor tracks the song position and controls any other synced action.
@@ -59,7 +65,8 @@ public class Conductor : MonoBehaviour
     private AudioSource musicSource;
 
     // Main vars with getters and setters
-    private List<MidiNote> midiNotes;
+    private List<MidiNote> trebleMidiNotes;
+    private List<MidiNote> bassMidiNotes;
     private float ticksperQuarterNote;
     private TimeSig timeSig;
     private float finalBeat;
@@ -99,9 +106,9 @@ public class Conductor : MonoBehaviour
         {
             songTime += AudioSettings.dspTime - previousFrameTime - firstBeatOffset; // TODO fix firstbeatoffset
             previousFrameTime = AudioSettings.dspTime;
-            if(musicSource.time != lastReportedPlayheadPosition)
+            if (musicSource.time != lastReportedPlayheadPosition)
             {
-                songTime = (songTime + musicSource.time)/2;
+                songTime = (songTime + musicSource.time) / 2;
                 lastReportedPlayheadPosition = musicSource.time;
             }
             songPositionInBeats = songTime / secPerBeat;
@@ -132,9 +139,16 @@ public class Conductor : MonoBehaviour
         return false;
     }*/
 
-    public bool CheckHit ()
+    public bool CheckHit(NoteType type)
     {
-        double currentBeat = songPositionInBeats - 0.5f; // TODO figure out why this needs a 0.5f offset.
+        var midiNotes = new List<MidiNote>();
+        if (type == NoteType.TREBLE)
+            midiNotes = trebleMidiNotes;
+        else if (type == NoteType.BASS)
+            midiNotes = bassMidiNotes;
+        else
+            Debug.LogError("Error: Conductor.cs CheckHit() invalid NoteType");
+        double currentBeat = songPositionInBeats;
         foreach (MidiNote midiNote in midiNotes)
         {
             if (currentBeat > midiNote.Position + correctThreshold)
@@ -154,62 +168,68 @@ public class Conductor : MonoBehaviour
     /// GETTERS AND SETTERS
     /// </summary>
 
-    public float GetBpm ()
+    public float GetBpm()
     {
-        return (float) songBpm;
+        return (float)songBpm;
     }
 
-    public void SetBpm (float newBpm)
+    public void SetBpm(float newBpm)
     {
-        songBpm = (double) newBpm;
+        songBpm = (double)newBpm;
     }
 
-    public double GetAudioSourceTime ()
+    public double GetAudioSourceTime()
     {
         return musicSource.time;
     }
 
-    public double GetSongTime ()
+    public double GetSongTime()
     {
         return songTime;
     }
 
-    public double GetSongBeat ()
+    public double GetSongBeat()
     {
         return songPositionInBeats;
     }
 
-    public List<MidiNote> GetMidiNotes ()
+    public List<MidiNote> GetMidiNotes(NoteType type)
     {
-        return midiNotes;
+        if (type == NoteType.TREBLE)
+            return trebleMidiNotes;
+        else if (type == NoteType.BASS)
+            return bassMidiNotes;
+        Debug.LogError("Error: Conductor.cs GetMidiNotes() invalid NoteType");
+        return new List<MidiNote>();
     }
 
-    public void SetMidiNotes(List<MidiNote> newNoteList)
+    public void SetMidiNotes(List<MidiNote> newTrebleList, List<MidiNote> newBassList)
     {
-        midiNotes = newNoteList;
+        trebleMidiNotes = newTrebleList;
+        bassMidiNotes = newBassList;
     }
 
-    public float GetTicksPerQuarterNote ()
+    public float GetTicksPerQuarterNote()
     {
         return ticksperQuarterNote;
     }
 
-    public void SetTicksperQuarterNote (float newTicksperQuarterNote)
+    public void SetTicksperQuarterNote(float newTicksperQuarterNote)
     {
         ticksperQuarterNote = newTicksperQuarterNote;
     }
 
-    public TimeSig GetTimeSig ()
+    public TimeSig GetTimeSig()
     {
         return timeSig;
     }
 
-    public void SetTimeSig (TimeSig newTimeSig)
+    public void SetTimeSig(TimeSig newTimeSig)
     {
         timeSig = newTimeSig;
     }
 
-    public float GetFinalBeat ()
+    public float GetFinalBeat()
     {
         return finalBeat;
     }
