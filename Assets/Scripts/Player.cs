@@ -32,7 +32,10 @@ public class Player : MonoBehaviour
             StartCoroutine(Hitting());
             if (Conductor.Instance.CheckHit(NoteType.BASS) == true)
             {
-                screenFlash.Flash();
+                if (screenFlash)
+                {
+                    screenFlash.Flash();
+                }
                 killable = true;
                 currentKillingType = NoteType.BASS;
             }
@@ -44,7 +47,10 @@ public class Player : MonoBehaviour
             StartCoroutine(Hitting());
             if (Conductor.Instance.CheckHit(NoteType.TREBLE) == true)
             {
-                screenFlash.Flash();
+                if (screenFlash)
+                {
+                    screenFlash.Flash();
+                }
                 killable = true;
                 currentKillingType = NoteType.TREBLE;
             }
@@ -79,8 +85,17 @@ public class Player : MonoBehaviour
     {
         if (killable)
         {
-            if (currentKillingType == collision.GetComponent<Note>().GetNoteType())
-                collision.GetComponent<Note>().Death();
+            try
+            {
+                if (currentKillingType == collision.GetComponent<Note>().GetNoteType())
+                    collision.GetComponent<Note>().Death();
+            }
+            catch (Exception e)
+            {
+
+            }
+
+
         }
     }
 }

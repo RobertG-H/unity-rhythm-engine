@@ -104,19 +104,19 @@ public class Conductor : MonoBehaviour
     {
         if (hasStarted)
         {
-            songTime += AudioSettings.dspTime - previousFrameTime - firstBeatOffset; // TODO fix firstbeatoffset
+            songTime += AudioSettings.dspTime - previousFrameTime;
             previousFrameTime = AudioSettings.dspTime;
             if (musicSource.time != lastReportedPlayheadPosition)
             {
                 songTime = (songTime + musicSource.time) / 2;
                 lastReportedPlayheadPosition = musicSource.time;
             }
-            songPositionInBeats = songTime / secPerBeat;
+            songPositionInBeats = (songTime - firstBeatOffset) / secPerBeat;
         }
     }
 
     /// <summary>
-    /// Start the soing
+    /// Start the song
     /// </summary>
     public void StartSong()
     {
@@ -167,6 +167,11 @@ public class Conductor : MonoBehaviour
     /// <summary>
     /// GETTERS AND SETTERS
     /// </summary>
+
+    public float GetOffset()
+    {
+        return (float)firstBeatOffset;
+    }
 
     public float GetBpm()
     {

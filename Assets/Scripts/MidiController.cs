@@ -85,12 +85,16 @@ public class MidiController : MonoBehaviour
                     // Not at the end yet
                     if (i < totalMidiEvents)
                     {
-                        MidiEvent nextMidievent = midiFile.Events[0][i + 1];
+                        // Find the associated off note midi
+                        MidiEvent nextMidievent = findOffNote(midiFile, 0, i);
                         noteLength = ((float)nextMidievent.DeltaTime / ticksperQuarterNote);
                     }
-                    Debug.Log(noteLength);
-                    MidiNote note = GenerateMidiNote(midiEvent.AbsoluteTime, noteLength);
-                    midiNotes.Add(note);
+                    if (noteLength != 0)
+                    {
+                        MidiNote note = GenerateMidiNote(midiEvent.AbsoluteTime, noteLength);
+                        midiNotes.Add(note);
+                    }
+
                 }
             }
         }
@@ -116,5 +120,16 @@ public class MidiController : MonoBehaviour
         notePosition += (beat);
         notePosition += tick / ticksperQuarterNote;
         return new MidiNote((int)bar, (int)beat, (int)tick, (float)notePosition, (float)noteLength);
+    }
+
+    private MidiEvent findOffNote(MidiFile midiFile, int trackIndex, int eventIndex)
+    {
+        MidiEvent midiEvent = midiFile.Events[trackIndex][eventIndex + 1];
+        while (!MidiEvent.IsNoteOff(midiEvent))
+        {
+            eventIndex++;
+            midiEvent = midiFile.Events[trackIndex][eventIndex];
+        }
+        return midiEvent;
     }
 }

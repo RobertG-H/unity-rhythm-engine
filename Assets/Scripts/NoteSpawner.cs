@@ -39,6 +39,8 @@ public class NoteSpawner : MonoBehaviour
     // SPAWN CALCULATIONS
     [SerializeField]
     private float noteStartOffset = -6.3f;
+
+    private float songOffset;
     [SerializeField]
     private float measureStartOffset;
     private float noteHeightOffset = 0.1f;
@@ -59,6 +61,7 @@ public class NoteSpawner : MonoBehaviour
         spawnDistanceMultiplier = Math.Abs(noteSpeed) / bps;
         trebleScoreHeight = trebleScore.transform.position.y;
         bassScoreHeight = bassScore.transform.position.y;
+        songOffset = (Math.Abs(noteSpeed) * Conductor.Instance.GetOffset());
     }
 
     // Update is called once per frame
@@ -94,7 +97,7 @@ public class NoteSpawner : MonoBehaviour
             // Spawn measure line
             if (scorePosition % (Conductor.Instance.GetTimeSig().Num) == 0)
             {
-                GameObject newSprite = Instantiate(measure, new Vector3(measureStartOffset + (scorePosition * spawnDistanceMultiplier), scoreHeight, 0), Quaternion.identity);
+                GameObject newSprite = Instantiate(measure, new Vector3(songOffset + measureStartOffset + (scorePosition * spawnDistanceMultiplier), scoreHeight, 0), Quaternion.identity);
                 newSprite.GetComponent<Note>().SetSpeed(noteSpeed);
             }
         }
@@ -117,7 +120,7 @@ public class NoteSpawner : MonoBehaviour
         // eighth sprite
         else if (roundedLength == Conductor.Instance.GetTimeSig().EIGHTH)
             sprite = eighthNoteSprite;
-        GameObject newNote = Instantiate(note, new Vector3(noteStartOffset + (scorePosition * spawnDistanceMultiplier), noteHeightOffset + scoreHeight, 0), Quaternion.identity);
+        GameObject newNote = Instantiate(note, new Vector3(songOffset + noteStartOffset + (scorePosition * spawnDistanceMultiplier), noteHeightOffset + scoreHeight, 0), Quaternion.identity);
         newNote.GetComponent<SpriteRenderer>().sprite = sprite;
         newNote.GetComponent<Note>().SetSpeed(noteSpeed);
         newNote.GetComponent<Note>().SetNoteType(noteType);
@@ -144,7 +147,7 @@ public class NoteSpawner : MonoBehaviour
         // eighth rest
         else if (roundedLength == Conductor.Instance.GetTimeSig().EIGHTH)
             sprite = eighthRestSprite;
-        GameObject newSprite = Instantiate(note, new Vector3(noteStartOffset + (endOfCurrentNote * spawnDistanceMultiplier), noteHeightOffset + scoreHeight, 0), Quaternion.identity);
+        GameObject newSprite = Instantiate(note, new Vector3(songOffset + noteStartOffset + (endOfCurrentNote * spawnDistanceMultiplier), noteHeightOffset + scoreHeight, 0), Quaternion.identity);
         newSprite.GetComponent<SpriteRenderer>().sprite = sprite;
         newSprite.GetComponent<Note>().SetSpeed(noteSpeed);
         return true;
