@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
 
+// Lost woods firstbeatoffset is 2.09
 public struct MidiNote
 {
     public int Bar;
@@ -89,6 +90,9 @@ public class Conductor : MonoBehaviour
 
     private float correctThreshold = 0.3f;
 
+    private int lastMidiNoteIndexTreble = 0;
+    private int lastMidiNoteIndexBass = 0;
+
     void Awake()
     {
         Instance = this;
@@ -139,7 +143,7 @@ public class Conductor : MonoBehaviour
         return false;
     }*/
 
-    public bool CheckHit(NoteType type)
+    public MidiNote? CheckHit(NoteType type)
     {
         var midiNotes = new List<MidiNote>();
         if (type == NoteType.TREBLE)
@@ -149,19 +153,34 @@ public class Conductor : MonoBehaviour
         else
             Debug.LogError("Error: Conductor.cs CheckHit() invalid NoteType");
         double currentBeat = songPositionInBeats;
-        foreach (MidiNote midiNote in midiNotes)
+        int start = 0;
+        if (type == NoteType.TREBLE)
+            start = lastMidiNoteIndexTreble;
+        else if (type == NoteType.BASS)
+            start = lastMidiNoteIndexBass;
+
+        for (int index = start; index < midiNotes.Count; ++index)
         {
+            MidiNote midiNote = midiNotes[index];
             if (currentBeat > midiNote.Position + correctThreshold)
             {
-                //midiNotes.Remove (midiNote); // TODO figure out a way to remove notes after they have been passed
+                if (type == NoteType.TREBLE)
+                    lastMidiNoteIndexTreble = index;
+                else if (type == NoteType.BASS)
+                    lastMidiNoteIndexBass = index;
+
             }
             if (currentBeat < midiNote.Position + correctThreshold && currentBeat > midiNote.Position - correctThreshold)
             {
-                return true;
+                if (type == NoteType.TREBLE)
+                    lastMidiNoteIndexTreble = index;
+                else if (type == NoteType.BASS)
+                    lastMidiNoteIndexBass = index;
+                return midiNote;
             }
         }
-
-        return false;
+        return null;
+        //return Nullable<MidiNote>;
     }
 
     /// <summary>

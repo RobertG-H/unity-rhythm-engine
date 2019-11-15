@@ -7,11 +7,17 @@ public class Player : MonoBehaviour
 {
     // Graphic objects
     private SpriteRenderer sprite;
+
+    [SerializeField]
+    private NoteSpawner noteSpawner;
+    private Animator trebleAnimator;
+    private Animator bassAnimator;
     [SerializeField]
     private ScreenFlash screenFlash;
 
     // Private bools
-    private bool isHitting;
+    private bool isHittingTreble;
+    private bool isHittingBass;
     private bool killable;
 
     private NoteType currentKillingType;
@@ -19,8 +25,11 @@ public class Player : MonoBehaviour
 
     void Start()
     {
-        sprite = GetComponent<SpriteRenderer>();
-        isHitting = false;
+        //sprite = GetComponent<SpriteRenderer>();
+        trebleAnimator = gameObject.transform.GetChild(0).GetComponent<Animator>();
+        bassAnimator = gameObject.transform.GetChild(1).GetComponent<Animator>();
+        isHittingTreble = false;
+        isHittingBass = false;
     }
 
     void Update()
@@ -28,36 +37,45 @@ public class Player : MonoBehaviour
         // Bass
         if (Input.GetKeyDown("s") || Input.GetKeyDown("d") || Input.GetKeyDown("f"))
         {
-            isHitting = true;
-            StartCoroutine(Hitting());
-            if (Conductor.Instance.CheckHit(NoteType.BASS) == true)
+            isHittingBass = true;
+            bassAnimator.SetBool("isHitting", isHittingBass);
+            StartCoroutine(HittingBass());
+            MidiNote? _bassNote = Conductor.Instance.CheckHit(NoteType.BASS);
+            if (_bassNote != null)
             {
+                MidiNote bassNote = (MidiNote)_bassNote;
                 if (screenFlash)
                 {
-                    screenFlash.Flash();
+                    //screenFlash.Flash();
                 }
                 killable = true;
                 currentKillingType = NoteType.BASS;
+                noteSpawner.DeleteNote(bassNote.Position, currentKillingType);
             }
         }
         // Treble
         if (Input.GetKeyDown("j") || Input.GetKeyDown("k") || Input.GetKeyDown("l"))
         {
-            isHitting = true;
+            isHittingTreble = true;
+            trebleAnimator.SetBool("isHitting", isHittingTreble);
             StartCoroutine(Hitting());
-            if (Conductor.Instance.CheckHit(NoteType.TREBLE) == true)
+            MidiNote? _trebleNote = Conductor.Instance.CheckHit(NoteType.TREBLE);
+            if (_trebleNote != null)
             {
+                MidiNote trebleNote = (MidiNote)_trebleNote;
                 if (screenFlash)
                 {
-                    screenFlash.Flash();
+                    //screenFlash.Flash();
                 }
                 killable = true;
                 currentKillingType = NoteType.TREBLE;
+                noteSpawner.DeleteNote(trebleNote.Position, currentKillingType);
             }
         }
         else
         {
-            isHitting = false;
+            isHittingTreble = false;
+            isHittingBass = false;
         }
     }
 
@@ -68,14 +86,23 @@ public class Player : MonoBehaviour
     {
         UpdateHitColor();
         yield return new WaitForSeconds(0.05f);
-        isHitting = false;
+        isHittingTreble = false;
+        trebleAnimator.SetBool("isHitting", isHittingTreble);
         killable = false;
         UpdateHitColor();
     }
 
+    IEnumerator HittingBass()
+    {
+        yield return new WaitForSeconds(0.05f);
+        isHittingBass = false;
+        bassAnimator.SetBool("isHitting", isHittingBass);
+    }
+
     public void UpdateHitColor()
     {
-        if (isHitting)
+        return;
+        if (isHittingTreble)
             sprite.color = Color.blue;
         else
             sprite.color = Color.white;
@@ -83,6 +110,7 @@ public class Player : MonoBehaviour
 
     private void OnTriggerStay2D(Collider2D collision)
     {
+        return;
         if (killable)
         {
             try

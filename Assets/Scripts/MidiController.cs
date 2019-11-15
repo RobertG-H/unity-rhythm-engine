@@ -125,10 +125,15 @@ public class MidiController : MonoBehaviour
     private MidiEvent findOffNote(MidiFile midiFile, int trackIndex, int eventIndex)
     {
         MidiEvent midiEvent = midiFile.Events[trackIndex][eventIndex + 1];
+        Debug.Log(eventIndex);
         while (!MidiEvent.IsNoteOff(midiEvent))
         {
             eventIndex++;
-            midiEvent = midiFile.Events[trackIndex][eventIndex];
+            try
+            {
+                midiEvent = midiFile.Events[trackIndex][eventIndex];
+            }
+            catch (ArgumentOutOfRangeException e) when (e.Data != null) { break; }
         }
         return midiEvent;
     }

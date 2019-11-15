@@ -54,6 +54,9 @@ public class NoteSpawner : MonoBehaviour
     private bool runOnce = true;
     private float spawnDistanceMultiplier;
 
+    private Dictionary<float, GameObject> trebleNotes = new Dictionary<float, GameObject>();
+    private Dictionary<float, GameObject> bassNotes = new Dictionary<float, GameObject>();
+
     void Start()
     {
         measureStartOffset = noteStartOffset - 1;
@@ -72,6 +75,24 @@ public class NoteSpawner : MonoBehaviour
             runOnce = false;
             SpawnAllNotes(NoteType.TREBLE, trebleScoreHeight);
             SpawnAllNotes(NoteType.BASS, bassScoreHeight);
+        }
+    }
+
+    public void DeleteNote(float notePosition, NoteType noteType)
+    {
+        Debug.Log("Trying to delete: " + notePosition);
+        if (noteType == NoteType.TREBLE)
+        {
+            try
+            {
+                trebleNotes[notePosition].GetComponent<Note>().Death();
+            }
+            catch (MissingReferenceException e) when (e.Data != null) { }
+
+        }
+        else if (noteType == NoteType.BASS)
+        {
+            bassNotes[notePosition].GetComponent<Note>().Death();
         }
     }
 
@@ -124,6 +145,10 @@ public class NoteSpawner : MonoBehaviour
         newNote.GetComponent<SpriteRenderer>().sprite = sprite;
         newNote.GetComponent<Note>().SetSpeed(noteSpeed);
         newNote.GetComponent<Note>().SetNoteType(noteType);
+        if (noteType == NoteType.TREBLE)
+            trebleNotes.Add(scorePosition, newNote);
+        else if (noteType == NoteType.BASS)
+            bassNotes.Add(scorePosition, newNote);
     }
 
     private bool CreateRest(float endOfCurrentNote, float startOfNextNote, float scoreHeight)
